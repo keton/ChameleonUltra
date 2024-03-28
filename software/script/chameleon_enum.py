@@ -260,6 +260,8 @@ class TagSpecificType(enum.IntEnum):
     NTAG_213 = 1100
     NTAG_215 = 1101
     NTAG_216 = 1102
+    MF0UL11 = 1103
+    MF0UL21 = 1104
     # MIFARE Plus series     1200
     # DESFire series         1300
 
@@ -303,6 +305,10 @@ class TagSpecificType(enum.IntEnum):
             return "NTAG 215"
         elif self == TagSpecificType.NTAG_216:
             return "NTAG 216"
+        elif self == TagSpecificType.MF0UL11:
+            return "MF0UL11"
+        elif self == TagSpecificType.MF0UL21:
+            return "MF0UL21"
         elif self < TagSpecificType.OLD_TAG_TYPES_END:
             return "Old tag type, must be migrated! Upgrade fw!"
         return "Invalid"

@@ -1686,6 +1686,8 @@ class HFMFUEConfig(SlotIndexArgsAndGoUnit, HF14AAntiCollArgsUnit, DeviceRequired
             TagSpecificType.NTAG_213,
             TagSpecificType.NTAG_215,
             TagSpecificType.NTAG_216,
+            TagSpecificType.MF0UL11,
+            TagSpecificType.MF0UL21,
         ]:
             print(f"{CR}Slot {self.slot_num} not configured as MIFARE Ultralight / NTAG{C0}")
             return
@@ -1913,6 +1915,7 @@ class HWSlotInit(TagTypeArgsUnit, SlotIndexArgsUnit):
         else:
             slot_num = SlotNumber.from_fw(self.cmd.get_active_slot())
         self.cmd.set_slot_data_default(slot_num, tag_type)
+        self.cmd.set_slot_tag_type(slot_num, tag_type)
         print(' - Set slot tag data init success.')
 
 
