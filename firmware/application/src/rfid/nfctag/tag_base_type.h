@@ -75,6 +75,8 @@ typedef enum {
     TAG_TYPE_NTAG_213 = 1100,
     TAG_TYPE_NTAG_215,
     TAG_TYPE_NTAG_216,
+    TAG_TYPE_MF0UL11,
+    TAG_TYPE_MF0UL21,
     // MIFARE Plus series        1200
     // DESFire series            1300
 
@@ -106,7 +108,9 @@ typedef enum {
     TAG_TYPE_MIFARE_4096,\
     TAG_TYPE_NTAG_213,\
     TAG_TYPE_NTAG_215,\
-    TAG_TYPE_NTAG_216
+    TAG_TYPE_NTAG_216,\
+    TAG_TYPE_MF0UL11,\
+    TAG_TYPE_MF0UL21
 
 typedef struct {
     tag_specific_type_t tag_hf;

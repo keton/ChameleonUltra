@@ -11,6 +11,9 @@
 #define NTAG215_PAGES 135 //135 pages total for ntag215, from 0 to 134
 #define NTAG216_PAGES 231 //231 pages total for ntag216, from 0 to 230
 
+#define MF0UL11_PAGES 20 //20 pages total for mf0ul11, from 0 to 19
+#define MF0UL21_PAGES 41 //41 pages total for mf0ul21, from 0 to 40
+
 
 typedef struct {
     uint8_t mode_uid_magic: 1;

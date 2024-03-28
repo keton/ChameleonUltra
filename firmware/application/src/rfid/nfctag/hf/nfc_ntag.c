@@ -14,6 +14,9 @@ NRF_LOG_MODULE_REGISTER();
 #define NTAG213_VERSION 0x0F
 #define NTAG215_VERSION 0x11
 #define NTAG216_VERSION 0x13
+#define MF0UL11_VERSION 0x0B
+#define MF0UL21_VERSION 0x0E
+#define MIFARE_ULTRALIGHT_TYPE 0x03
 
 // NTAG COMMANDS
 #define CMD_GET_VERSION             0x60
@@ -40,6 +43,8 @@ NRF_LOG_MODULE_REGISTER();
 #define NTAG213_CONFIG_AREA_START_ADDRESS   0xA4  // 4 * 0x29
 #define NTAG215_CONFIG_AREA_START_ADDRESS   0x20C // 4 * 0x83
 #define NTAG216_CONFIG_AREA_START_ADDRESS   0x38C // 4 * 0xE3
+#define MF0UL11_CONFIG_AREA_START_ADDRESS   0x40 // 4 * 10h
+#define MF0UL21_CONFIG_AREA_START_ADDRESS   0x94 // 4 * 25h
 #define CONFIG_AREA_SIZE            8
 // CONFIG offsets, relative to config start address
 #define CONF_AUTH0_OFFSET           0x03
@@ -91,6 +96,12 @@ static int get_block_max_by_tag_type(tag_specific_type_t tag_type) {
         case TAG_TYPE_NTAG_216:
             block_max = NTAG216_PAGES;
             break;
+        case TAG_TYPE_MF0UL11:
+            block_max = MF0UL11_PAGES;
+            break;
+        case TAG_TYPE_MF0UL21:
+            block_max = MF0UL21_PAGES;
+            break;
     }
     return block_max;
 }
@@ -107,6 +118,12 @@ static int get_block_cfg_by_tag_type(tag_specific_type_t tag_type) {
             break;
         case TAG_TYPE_NTAG_216:
             block_max = NTAG216_CONFIG_AREA_START_ADDRESS;
+            break;
+        case TAG_TYPE_MF0UL11:
+            block_max = MF0UL11_CONFIG_AREA_START_ADDRESS;
+            break;
+        case TAG_TYPE_MF0UL21:
+            block_max = MF0UL21_CONFIG_AREA_START_ADDRESS;
             break;
     }
     return block_max;
@@ -129,6 +146,16 @@ void nfc_tag_ntag_state_handler(uint8_t *p_data, uint16_t szDataBits) {
                     break;
                 case TAG_TYPE_NTAG_216:
                     m_tag_tx_buffer.tx_buffer[6] = NTAG216_VERSION;
+                    break;
+                case TAG_TYPE_MF0UL11:
+                    m_tag_tx_buffer.tx_buffer[2] = MIFARE_ULTRALIGHT_TYPE;
+                    m_tag_tx_buffer.tx_buffer[3] = 0x01;
+                    m_tag_tx_buffer.tx_buffer[6] = MF0UL11_VERSION;
+                    break;
+                case TAG_TYPE_MF0UL21:
+                    m_tag_tx_buffer.tx_buffer[2] = MIFARE_ULTRALIGHT_TYPE;
+                    m_tag_tx_buffer.tx_buffer[3] = 0x01;
+                    m_tag_tx_buffer.tx_buffer[6] = MF0UL21_VERSION;
                     break;
             }
             nfc_tag_14a_tx_bytes(m_tag_tx_buffer.tx_buffer, 8, true);

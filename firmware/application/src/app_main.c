@@ -653,7 +653,9 @@ static void btn_fn_copy_ic_uid(void) {
 
         case TAG_TYPE_NTAG_213:
         case TAG_TYPE_NTAG_215:
-        case TAG_TYPE_NTAG_216: {
+        case TAG_TYPE_NTAG_216:
+        case TAG_TYPE_MF0UL11:
+        case TAG_TYPE_MF0UL21: {
             nfc_tag_ntag_information_t *p_info = (nfc_tag_ntag_information_t *)buffer->buffer;
             antres = &(p_info->res_coll);
             break;
