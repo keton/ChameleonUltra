@@ -66,6 +66,9 @@ NRF_LOG_MODULE_REGISTER();
 // SIGNATURE Length
 #define SIGNATURE_LENGTH            32
 
+// one way counter length
+#define OTP_COUNTER_LENGTH 3
+
 // NTAG215_Version[7] mean:
 // 0x0F ntag213
 // 0x11 ntag215
@@ -211,6 +214,12 @@ void nfc_tag_ntag_state_handler(uint8_t *p_data, uint16_t szDataBits) {
         case CMD_READ_SIG:
             memset(m_tag_tx_buffer.tx_buffer, 0xCA, SIGNATURE_LENGTH);
             nfc_tag_14a_tx_bytes(m_tag_tx_buffer.tx_buffer, SIGNATURE_LENGTH, true);
+            break;
+        case CMD_READ_CNT:
+            // Stub value 0xFFFFFF means counter reached the end.
+            // some apps require working CMD_READ_CNT for Mifare Ultralight EV1
+            memset(m_tag_tx_buffer.tx_buffer, 0xFF, OTP_COUNTER_LENGTH);
+            nfc_tag_14a_tx_bytes(m_tag_tx_buffer.tx_buffer, OTP_COUNTER_LENGTH, true);
             break;
     }
     return;
