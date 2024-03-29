@@ -983,6 +983,119 @@ static data_frame_tx_t *cmd_processor_delete_all_ble_bonds(uint16_t cmd, uint16_
     return data_frame_make(cmd, STATUS_SUCCESS, 0, NULL);
 }
 
+static bool tag_type_is_signature_supported(tag_specific_type_t type) {
+    switch(type) {
+        case TAG_TYPE_NTAG_213:
+        case TAG_TYPE_NTAG_215:
+        case TAG_TYPE_NTAG_216:
+        case TAG_TYPE_MF0UL11:
+        case TAG_TYPE_MF0UL21:
+            return true;
+        default:
+            return false;
+    }
+
+    return false;
+}
+
+static data_frame_tx_t *cmd_processor_mfu_set_slot_signature(uint16_t cmd, uint16_t status, uint16_t length, uint8_t *data) {
+    typedef struct {
+        uint8_t num_slot;
+        uint8_t signature[NFC_TAG_NTAG_SIGNATURE_LENGTH];
+    } PACKED payload_t;
+    if (length != sizeof(payload_t)) {
+        return data_frame_make(cmd, STATUS_PAR_ERR, 0, NULL);
+    }
+
+    payload_t *payload = (payload_t *)data;
+
+    if (payload->num_slot >= TAG_MAX_SLOT_NUM) {
+        return data_frame_make(cmd, STATUS_PAR_ERR, 0, NULL);
+    }
+    tag_slot_specific_type_t slot_type = {0};
+    
+    tag_emulation_get_specific_types_by_slot(payload->num_slot, &slot_type);
+
+    if(!tag_type_is_signature_supported(slot_type.tag_hf)) {
+        return data_frame_make(cmd, STATUS_PAR_ERR, 0, NULL);
+    }
+
+    tag_data_buffer_t *buffer = get_buffer_by_tag_type(slot_type.tag_hf);
+    if (buffer == NULL) {
+        return data_frame_make(cmd, STATUS_PAR_ERR, 0, NULL);
+    }
+
+    fds_slot_record_map_t map_info;
+    get_fds_map_by_slot_sense_type_for_dump(payload->num_slot, TAG_SENSE_HF, &map_info);
+
+    uint16_t fds_op_length = buffer->length;
+    bool res = fds_read_sync(map_info.id, map_info.key, &fds_op_length, buffer->buffer);
+    if(!res) {
+        return data_frame_make(cmd, STATUS_PAR_ERR, 0, NULL);
+    }
+
+    nfc_tag_ntag_information_t* const ntag = (nfc_tag_ntag_information_t*) buffer->buffer;
+
+    memcpy(ntag->signature, payload->signature, NFC_TAG_NTAG_SIGNATURE_LENGTH);
+
+    fds_op_length = buffer->length;
+    res = fds_write_sync(map_info.id, map_info.key, fds_op_length, buffer->buffer);
+    if(!res) {
+        return data_frame_make(cmd, STATUS_PAR_ERR, 0, NULL);
+    }
+
+    tag_emulation_load_data();
+
+    return data_frame_make(cmd, STATUS_SUCCESS, 0, NULL);
+}
+
+static data_frame_tx_t *cmd_processor_mfu_get_slot_signature(uint16_t cmd, uint16_t status, uint16_t length, uint8_t *data) {
+    typedef struct {
+        uint8_t num_slot;
+    } PACKED payload_t;
+    if (length != sizeof(payload_t)) {
+        return data_frame_make(cmd, STATUS_PAR_ERR, 0, NULL);
+    }
+
+    payload_t *payload = (payload_t *)data;
+
+    if (payload->num_slot >= TAG_MAX_SLOT_NUM) {
+        return data_frame_make(cmd, STATUS_PAR_ERR, 0, NULL);
+    }
+    tag_slot_specific_type_t slot_type = {0};
+    
+    tag_emulation_get_specific_types_by_slot(payload->num_slot, &slot_type);
+
+    if(!tag_type_is_signature_supported(slot_type.tag_hf)) {
+        return data_frame_make(cmd, STATUS_PAR_ERR, 0, NULL);
+    }
+
+    tag_data_buffer_t *buffer = get_buffer_by_tag_type(slot_type.tag_hf);
+    if (buffer == NULL) {
+        return data_frame_make(cmd, STATUS_PAR_ERR, 0, NULL);
+    }
+
+    fds_slot_record_map_t map_info;
+    get_fds_map_by_slot_sense_type_for_dump(payload->num_slot, TAG_SENSE_HF, &map_info);
+
+    uint16_t fds_op_length = buffer->length;
+    bool res = fds_read_sync(map_info.id, map_info.key, &fds_op_length, buffer->buffer);
+    if(!res) {
+        return data_frame_make(cmd, STATUS_PAR_ERR, 0, NULL);
+    }
+
+    nfc_tag_ntag_information_t* const ntag = (nfc_tag_ntag_information_t*) buffer->buffer;
+
+    uint8_t out[NFC_TAG_NTAG_SIGNATURE_LENGTH] = {0};
+
+    memcpy(out, ntag->signature, NFC_TAG_NTAG_SIGNATURE_LENGTH);
+
+    tag_emulation_load_data();
+
+    return data_frame_make(cmd, STATUS_SUCCESS, NFC_TAG_NTAG_SIGNATURE_LENGTH, out);
+}
+
+
 #if defined(PROJECT_CHAMELEON_ULTRA)
 
 
@@ -1109,6 +1222,8 @@ static cmd_data_map_t m_data_cmd_map[] = {
     {    DATA_CMD_MF1_GET_WRITE_MODE,           NULL,                        cmd_processor_mf1_get_write_mode,            NULL                   },
     {    DATA_CMD_MF1_SET_WRITE_MODE,           NULL,                        cmd_processor_mf1_set_write_mode,            NULL                   },
     {    DATA_CMD_HF14A_GET_ANTI_COLL_DATA,     NULL,                        cmd_processor_hf14a_get_anti_coll_data,      NULL                   },
+    {    DATA_CMD_MFU_SET_SLOT_SIGNATURE,       NULL,                        cmd_processor_mfu_set_slot_signature,        NULL                   },
+	{    DATA_CMD_MFU_GET_SLOT_SIGNATURE,       NULL,                        cmd_processor_mfu_get_slot_signature,        NULL                   },
 
     {    DATA_CMD_EM410X_SET_EMU_ID,            NULL,                        cmd_processor_em410x_set_emu_id,             NULL                   },
     {    DATA_CMD_EM410X_GET_EMU_ID,            NULL,                        cmd_processor_em410x_get_emu_id,             NULL                   },

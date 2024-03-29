@@ -14,6 +14,7 @@
 #define MF0UL11_PAGES 20 //20 pages total for mf0ul11, from 0 to 19
 #define MF0UL21_PAGES 41 //41 pages total for mf0ul21, from 0 to 40
 
+#define NFC_TAG_NTAG_SIGNATURE_LENGTH 32
 
 typedef struct {
     uint8_t mode_uid_magic: 1;
@@ -27,6 +28,7 @@ typedef struct {
 typedef struct __attribute__((aligned(4))) {
     nfc_tag_14a_coll_res_entity_t res_coll;
     nfc_tag_ntag_configure_t config;
+    uint8_t signature[NFC_TAG_NTAG_SIGNATURE_LENGTH];
     uint8_t memory[NFC_TAG_NTAG_BLOCK_MAX][NFC_TAG_NTAG_DATA_SIZE];
 }
 nfc_tag_ntag_information_t;

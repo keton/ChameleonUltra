@@ -212,8 +212,8 @@ void nfc_tag_ntag_state_handler(uint8_t *p_data, uint16_t szDataBits) {
             break;
         }
         case CMD_READ_SIG:
-            memset(m_tag_tx_buffer.tx_buffer, 0xCA, SIGNATURE_LENGTH);
-            nfc_tag_14a_tx_bytes(m_tag_tx_buffer.tx_buffer, SIGNATURE_LENGTH, true);
+            memcpy(m_tag_tx_buffer.tx_buffer, m_tag_information->signature, NFC_TAG_NTAG_SIGNATURE_LENGTH);
+            nfc_tag_14a_tx_bytes(m_tag_tx_buffer.tx_buffer, NFC_TAG_NTAG_SIGNATURE_LENGTH, true);
             break;
         case CMD_READ_CNT:
             // Stub value 0xFFFFFF means counter reached the end.
@@ -241,7 +241,7 @@ void nfc_tag_ntag_reset_handler() {
 }
 
 static int get_information_size_by_tag_type(tag_specific_type_t type) {
-    return sizeof(nfc_tag_14a_coll_res_entity_t) + sizeof(nfc_tag_ntag_configure_t) + (get_block_max_by_tag_type(type) * NFC_TAG_NTAG_DATA_SIZE);
+    return sizeof(nfc_tag_14a_coll_res_entity_t) + sizeof(nfc_tag_ntag_configure_t) + (get_block_max_by_tag_type(type) * NFC_TAG_NTAG_DATA_SIZE) + NFC_TAG_NTAG_SIGNATURE_LENGTH;
 }
 
 /** @brief ntag's callback before saving data
@@ -287,7 +287,7 @@ bool nfc_tag_ntag_data_factory(uint8_t slot, tag_specific_type_t tag_type) {
     uint8_t default_p2[] = { 0x42, 0x48, 0x0F, 0xE0 };
 
     // default ntag info
-    nfc_tag_ntag_information_t ntag_tmp_information;
+    nfc_tag_ntag_information_t ntag_tmp_information = {0};
     nfc_tag_ntag_information_t *p_ntag_information;
     p_ntag_information = &ntag_tmp_information;
     int block_max = get_block_max_by_tag_type(tag_type);

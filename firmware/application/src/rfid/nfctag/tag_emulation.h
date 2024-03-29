@@ -110,6 +110,8 @@ void tag_emulation_slot_set_enable(uint8_t slot, tag_sense_type_t sense_type, bo
 void tag_emulation_get_specific_types_by_slot(uint8_t slot, tag_slot_specific_type_t *tag_types);
 // Initialize some factory data
 void tag_emulation_factory_init(void);
+//reload emulated card data from flash
+void tag_emulation_load_data(void);
 
 //In the direction, query any card slot that enable
 uint8_t tag_emulation_slot_find_next(uint8_t slot_now);
