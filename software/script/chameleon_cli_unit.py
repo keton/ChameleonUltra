@@ -2147,6 +2147,24 @@ class HWSettingsReset(DeviceRequiredUnit):
         else:
             print(" - Reset failed")
 
+@hw_settings.command('oneshot')
+class HWSettingsOneShot(DeviceRequiredUnit):
+    def args_parser(self) -> ArgumentParserNoExit:
+        parser = ArgumentParserNoExit()
+        parser.description = 'Control HF oneshot mode'
+        parser.add_argument("--enable", required=False, action="store_true")
+        parser.add_argument("--disable", required=False, action="store_true")
+        return parser
+
+    def on_exec(self, args: argparse.Namespace):
+        if (args.enable is False) and (args.disable is False):
+            res = self.cmd.hf14a_get_one_shot_mode()
+            print("Oneshot status:", res['enabled'])
+            return
+        if(args.enable):
+            self.cmd.hf14a_set_one_shot_mode(True)
+        else:
+            self.cmd.hf14a_set_one_shot_mode(False)
 
 @hw.command('factory_reset')
 class HWFactoryReset(DeviceRequiredUnit):

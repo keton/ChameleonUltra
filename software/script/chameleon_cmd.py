@@ -918,6 +918,30 @@ class ChameleonCMD:
             offset += struct.calcsize(f'!{atslen}s')
             resp.parsed = {'uid': uid, 'atqa': atqa, 'sak': sak, 'ats': ats}
         return resp
+    
+    @expect_response(Status.SUCCESS)
+    def hf14a_get_one_shot_mode(self):
+        """
+        Get HF one shot mode setting
+
+        :return:
+        """
+        resp = self.device.send_cmd_sync(Command.HF14A_GET_ONE_SHOT_MODE)
+        if resp.status == Status.SUCCESS and len(resp.data) > 0:
+            # enabled[0]
+            enabled = struct.unpack_from('@?', resp.data)
+            resp.parsed = {'enabled': enabled[0]}
+        return resp
+    
+    @expect_response(Status.SUCCESS)
+    def hf14a_set_one_shot_mode(self, enabled):
+        """
+        Set HF one shot mode
+
+        :return:
+        """
+        data = struct.pack('!B', int(enabled))
+        return self.device.send_cmd_sync(Command.HF14A_SET_ONE_SHOT_MODE, data)
 
     @expect_response(Status.SUCCESS)
     def get_ble_pairing_enable(self):
