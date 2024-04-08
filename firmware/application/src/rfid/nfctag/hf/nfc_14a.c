@@ -600,6 +600,17 @@ void nfc_tag_14a_event_callback(nrfx_nfct_evt_t const *p_event) {
         }
         case NRFX_NFCT_EVT_FIELD_LOST: {
             g_is_tag_emulating = false;
+
+            /*
+                Hack warning: some broken NFC readers pulse the field on and off causing tags to be read over and over again
+
+                This is not wanted behaviour in some cases. Hence special mode was added to disable field sensing after tag is read.
+                Selecting new tag slot (button/cli) reenables hf field sense
+            */
+            if(g_is_tag_emulating_one_shot && (m_tag_state_14a == NFC_TAG_STATE_14A_ACTIVE || m_tag_state_14a == NFC_TAG_STATE_14A_HALTED)) {
+                nrfx_nfct_init_substate_force(NRFX_NFCT_ACTIVE_STATE_SLEEP);
+            }
+
             // call sleep_timer_start *after* unsetting g_is_tag_emulating
             sleep_timer_start(SLEEP_DELAY_MS_FIELD_NFC_LOST);
 

@@ -12,6 +12,7 @@
 #define TAG_MAX_SLOT_NUM    8
 
 extern bool g_is_tag_emulating;
+extern bool g_is_tag_emulating_one_shot;
 
 // Label data buffer
 typedef struct {

@@ -1095,6 +1095,28 @@ static data_frame_tx_t *cmd_processor_mfu_get_slot_signature(uint16_t cmd, uint1
     return data_frame_make(cmd, STATUS_SUCCESS, NFC_TAG_NTAG_SIGNATURE_LENGTH, out);
 }
 
+static data_frame_tx_t *cmd_processor_hf14a_get_one_shot_mode(uint16_t cmd, uint16_t status, uint16_t length, uint8_t *data) {
+    if (length != 0) {
+        return data_frame_make(cmd, STATUS_PAR_ERR, 0, NULL);
+    }
+
+    uint8_t res = g_is_tag_emulating_one_shot;
+    return data_frame_make(cmd, STATUS_SUCCESS, 1, &res);
+}
+
+static data_frame_tx_t *cmd_processor_hf14a_set_one_shot_mode(uint16_t cmd, uint16_t status, uint16_t length, uint8_t *data) {
+    typedef struct {
+        uint8_t one_shot_enabled;
+    } PACKED payload_t;
+    if (length != sizeof(payload_t)) {
+        return data_frame_make(cmd, STATUS_PAR_ERR, 0, NULL);
+    }
+
+    payload_t *payload = (payload_t *)data;
+    g_is_tag_emulating_one_shot = (payload->one_shot_enabled > 0);
+    
+    return data_frame_make(cmd, STATUS_SUCCESS, 0, NULL);
+}
 
 #if defined(PROJECT_CHAMELEON_ULTRA)
 
@@ -1224,6 +1246,9 @@ static cmd_data_map_t m_data_cmd_map[] = {
     {    DATA_CMD_HF14A_GET_ANTI_COLL_DATA,     NULL,                        cmd_processor_hf14a_get_anti_coll_data,      NULL                   },
     {    DATA_CMD_MFU_SET_SLOT_SIGNATURE,       NULL,                        cmd_processor_mfu_set_slot_signature,        NULL                   },
 	{    DATA_CMD_MFU_GET_SLOT_SIGNATURE,       NULL,                        cmd_processor_mfu_get_slot_signature,        NULL                   },
+    {    DATA_CMD_HF14A_GET_ONE_SHOT_MODE,       NULL,                       cmd_processor_hf14a_get_one_shot_mode,       NULL                   },
+    {    DATA_CMD_HF14A_SET_ONE_SHOT_MODE,       NULL,                       cmd_processor_hf14a_set_one_shot_mode,       NULL                   },
+    
 
     {    DATA_CMD_EM410X_SET_EMU_ID,            NULL,                        cmd_processor_em410x_set_emu_id,             NULL                   },
     {    DATA_CMD_EM410X_GET_EMU_ID,            NULL,                        cmd_processor_em410x_get_emu_id,             NULL                   },

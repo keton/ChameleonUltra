@@ -108,6 +108,8 @@
 #define DATA_CMD_HF14A_GET_ANTI_COLL_DATA       (4018)
 #define DATA_CMD_MFU_SET_SLOT_SIGNATURE         (4019)
 #define DATA_CMD_MFU_GET_SLOT_SIGNATURE         (4020)
+#define DATA_CMD_HF14A_GET_ONE_SHOT_MODE        (4101)
+#define DATA_CMD_HF14A_SET_ONE_SHOT_MODE        (4102)
 //
 // ******************************************************************
 
