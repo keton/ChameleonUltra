@@ -586,6 +586,31 @@ class ChameleonCMD:
         """
         data = struct.pack(f'!B{len(uid)}s2s1sB{len(ats)}s', len(uid), uid, atqa, sak, len(ats), ats)
         return self.device.send_cmd_sync(Command.HF14A_SET_ANTI_COLL_DATA, data)
+    
+    @expect_response(Status.SUCCESS)
+    def hf14a_set_slot_signature(self, slot_index: int, signature: bytes):
+        """
+        Set uid signature on Mifare Ultralight tags
+
+        :param slot_index:  slot number
+        :param signature: signature bytes
+        :return:
+        """
+        data = struct.pack('!B32s', SlotNumber.to_fw(slot_index), signature)
+        return self.device.send_cmd_sync(Command.MFU_SET_SLOT_SIGNATURE, data)
+    
+    @expect_response(Status.SUCCESS)
+    def hf14a_get_slot_signature(self, slot_index: int) -> bytes:
+        """
+        Set uid signature on Mifare Ultralight tags
+
+        :param slot:  slot number
+        :return: signature bytes
+        """
+        data = struct.pack('!B', SlotNumber.to_fw(slot_index))
+        resp = self.device.send_cmd_sync(Command.MFU_GET_SLOT_SIGNATURE, data)
+        resp.parsed = bytes(resp.data)
+        return resp
 
     @expect_response(Status.SUCCESS)
     def set_slot_tag_nick(self, slot: SlotNumber, sense_type: TagSenseType, name: str):

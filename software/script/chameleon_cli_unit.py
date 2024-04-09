@@ -1703,6 +1703,38 @@ class HFMFUEConfig(SlotIndexArgsAndGoUnit, HF14AAntiCollArgsUnit, DeviceRequired
             if len(ats) > 0:
                 print(f'- {"ATS:":40}{CY}{ats.hex().upper()}{C0}')
 
+@hf_mfu.command('signature')
+class HFMFUEConfig(SlotIndexArgsAndGoUnit, DeviceRequiredUnit):
+    def args_parser(self) -> ArgumentParserNoExit:
+        parser = ArgumentParserNoExit()
+        parser.description = 'Settings of Mifare Classic emulator'
+        self.add_slot_args(parser)
+        parser.add_argument('--set', type=str, metavar="<hex>", help="Signature value to set")
+        return parser
+
+    def on_exec(self, args: argparse.Namespace):
+        slotinfo = self.cmd.get_slot_info()
+        fwslot = SlotNumber.to_fw(self.slot_num)
+        hf_tag_type = TagSpecificType(slotinfo[fwslot]['hf'])
+        if hf_tag_type not in [
+            TagSpecificType.NTAG_213,
+            TagSpecificType.NTAG_215,
+            TagSpecificType.NTAG_216,
+            TagSpecificType.MF0UL11,
+            TagSpecificType.MF0UL21,
+        ]:
+            print(f"{CR}Slot {self.slot_num} not configured as MIFARE Ultralight / NTAG{C0}")
+            return
+        if args.set is None:
+            resp = self.cmd.hf14a_get_slot_signature(self.slot_num)
+            print(f"Slot {self.slot_num}, signature:", resp.hex())
+            return
+        if re.match(r"[a-fA-F0-9]+", args.set) is not None:
+            new_signature = bytes.fromhex(args.set)
+            if len(new_signature) != 32:
+                raise Exception("Signature length error")
+            self.cmd.hf14a_set_slot_signature(self.slot_num, new_signature)
+
 
 @lf_em_410x.command('read')
 class LFEMRead(ReaderRequiredUnit):
